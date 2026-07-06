@@ -146,7 +146,8 @@ export default function AdminDashboard() {
 
   const checkBotStatus = async () => {
     try {
-      const res = await fetch('http://localhost:3001/status');
+      const botUrl = process.env.NEXT_PUBLIC_BOT_URL || 'http://localhost:3001';
+      const res = await fetch(`${botUrl}/status`);
       const data = await res.json();
       setBotStatus(data);
     } catch (e) {
