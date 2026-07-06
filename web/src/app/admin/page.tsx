@@ -107,6 +107,19 @@ export default function AdminDashboard() {
     if (data) setAllOrders(data);
   };
 
+  const handleClearAllOrders = async () => {
+    if (!window.confirm('Are you sure you want to delete ALL orders? This action cannot be undone and will permanently delete all order history.')) return;
+    
+    const { error } = await supabase.from('orders').delete().not('id', 'is', null);
+    
+    if (error) {
+      alert('Failed to clear orders: ' + error.message);
+    } else {
+      setAllOrders([]);
+      fetchAnalytics();
+    }
+  };
+
   const updateStallPassword = async () => {
     const { error } = await supabase.from('settings').upsert({ key: 'stall_password', value: stallPasswordInput });
     if (!error) {
@@ -473,9 +486,14 @@ export default function AdminDashboard() {
             <div className="glass-card rounded-2xl p-6 border border-white/10">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-lg font-bold text-brand-gold uppercase tracking-widest text-sm">All Orders ({allOrders.length})</h2>
-                <button onClick={fetchAllOrders} className="text-white/60 text-sm font-bold hover:text-brand-gold transition-colors flex items-center gap-1">
-                  <span className="text-lg">↻</span> Refresh
-                </button>
+                <div className="flex items-center gap-4">
+                  <button onClick={handleClearAllOrders} disabled={allOrders.length === 0} className="text-red-400 text-sm font-bold hover:text-red-300 transition-colors flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <Trash2 className="w-4 h-4" /> Clear All
+                  </button>
+                  <button onClick={fetchAllOrders} className="text-white/60 text-sm font-bold hover:text-brand-gold transition-colors flex items-center gap-1">
+                    <span className="text-lg">↻</span> Refresh
+                  </button>
+                </div>
               </div>
               <div className="space-y-4">
                 {allOrders.length === 0 && <p className="text-center text-white/50 py-12 glass-card rounded-2xl border border-white/10 border-dashed">No orders found.</p>}
