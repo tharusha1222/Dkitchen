@@ -56,7 +56,7 @@ export default function StallDashboard() {
           *,
           profiles(phone_number),
           stalls(name),
-          order_items(quantity, price_at_time, notes, menu_items(name))
+          order_items(quantity, price_at_time, menu_items(name))
         `)
         .eq('qr_token', token)
         .single();
@@ -67,6 +67,19 @@ export default function StallDashboard() {
 
       if (data.status === 'completed') {
         throw new Error('This order has already been completed.');
+      }
+
+      // Decode notes from qr_token
+      const parts = data.qr_token.split('_');
+      if (parts.length > 3) {
+        try {
+          const notesArray = JSON.parse(decodeURIComponent(atob(parts[3])));
+          data.order_items.forEach((item: any, idx: number) => {
+            item.notes = notesArray[idx] || '';
+          });
+        } catch (e) {
+          console.error('Failed to parse notes from qr_token', e);
+        }
       }
 
       setOrderData(data);

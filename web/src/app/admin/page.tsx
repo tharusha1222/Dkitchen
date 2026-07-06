@@ -106,9 +106,26 @@ export default function AdminDashboard() {
   const fetchAllOrders = async () => {
     const { data } = await supabase
       .from('orders')
-      .select('*, profiles(phone_number, full_name), stalls(name), order_items(quantity, price_at_time, notes, menu_items(name))')
+      .select('*, profiles(phone_number, full_name), stalls(name), order_items(quantity, price_at_time, menu_items(name))')
       .order('created_at', { ascending: false });
-    if (data) setAllOrders(data);
+    
+    if (data) {
+      const processedOrders = data.map(order => {
+        const parts = order.qr_token.split('_');
+        if (parts.length > 3) {
+          try {
+            const notesArray = JSON.parse(decodeURIComponent(atob(parts[3])));
+            order.order_items.forEach((item: any, idx: number) => {
+              item.notes = notesArray[idx] || '';
+            });
+          } catch (e) {
+            console.error('Failed to parse notes from qr_token', e);
+          }
+        }
+        return order;
+      });
+      setAllOrders(processedOrders);
+    }
   };
 
   const updateOrderStatus = async (id: string, status: string) => {

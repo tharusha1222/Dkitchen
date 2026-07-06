@@ -86,7 +86,10 @@ export default function OrderPage() {
         return;
       }
 
-      const token = `ORDER_${Date.now()}_${userPhone}`;
+      const notesArray = cart.map(item => item.selectedAccomps.map(a => a.name).join(', '));
+      const hasNotes = notesArray.some(n => n !== '');
+      const encodedNotes = hasNotes ? btoa(encodeURIComponent(JSON.stringify(notesArray))) : '';
+      const token = `ORDER_${Date.now()}_${userPhone}${encodedNotes ? '_' + encodedNotes : ''}`;
 
       const { data: orderData, error: orderError } = await supabase.from('orders').insert({
         total_amount: finalTotal,
@@ -108,8 +111,6 @@ export default function OrderPage() {
           menu_item_id: item.id,
           quantity: item.quantity,
           price_at_time: item.price,
-          // Store accompaniment names as notes (we'll expand this later)
-          notes: item.selectedAccomps.map(a => a.name).join(', '),
         }));
         await supabase.from('order_items').insert(itemsToInsert);
 
