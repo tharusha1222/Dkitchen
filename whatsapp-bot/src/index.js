@@ -1,9 +1,11 @@
-const express = require('express');
-const cors = require('cors');
-const { makeWASocket, useMultiFileAuthState, DisconnectReason } = require('@whiskeysockets/baileys');
-const pino = require('pino');
-const qrcode = require('qrcode-terminal');
-const fs = require('fs');
+import express from 'express';
+import cors from 'cors';
+import { makeWASocket, useMultiFileAuthState, DisconnectReason } from '@whiskeysockets/baileys';
+import pino from 'pino';
+import qrcode from 'qrcode-terminal';
+import fs from 'fs';
+import { createRequire } from 'module';
+
 
 const app = express();
 app.use(cors());
@@ -18,7 +20,6 @@ async function connectToWhatsApp () {
     sock = makeWASocket({
         auth: state,
         logger: pino({ level: 'silent' }),
-        printQRInTerminal: true
     });
 
     sock.ev.on('creds.update', saveCreds);
@@ -58,6 +59,31 @@ app.get('/status', (req, res) => {
         qr: qrCodeData
     });
 });
+
+app.get('/qr', (req, res) => {
+    if (sock?.user) {
+        return res.send('<h2 style="font-family:sans-serif;color:green">✅ WhatsApp is connected!</h2>');
+    }
+    if (!qrCodeData) {
+        return res.send(`
+            <html><head><meta http-equiv="refresh" content="3">
+            <style>body{font-family:sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;margin:0;background:#f5f5f5}</style></head>
+            <body><h2>⏳ Waiting for QR code...</h2><p>This page will auto-refresh every 3 seconds.</p></body></html>
+        `);
+    }
+    const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrCodeData)}`;
+    res.send(`
+        <html><head><meta http-equiv="refresh" content="30">
+        <style>body{font-family:sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;margin:0;background:#f5f5f5}</style></head>
+        <body>
+            <h2>📱 Scan with WhatsApp</h2>
+            <p>WhatsApp → Settings → Linked Devices → Link a Device</p>
+            <img src="${qrImageUrl}" style="border:4px solid #25D366;border-radius:12px;padding:8px;background:white"/>
+            <p style="color:#888;font-size:12px">QR refreshes every 30s</p>
+        </body></html>
+    `);
+});
+
 
 app.post('/send-otp', async (req, res) => {
     const { phoneNumber, otp, name } = req.body;
