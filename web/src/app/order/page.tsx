@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useCart } from '@/components/CartProvider';
 import { supabase } from '@/lib/supabase';
 import { QRCodeSVG } from 'qrcode.react';
-import { ArrowLeft, Trash2, CheckCircle2, Loader2, Minus, Plus, Soup } from 'lucide-react';
+import { ArrowLeft, Trash2, CheckCircle2, Loader2, Minus, Plus, Soup, X } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
