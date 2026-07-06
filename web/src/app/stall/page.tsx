@@ -67,7 +67,8 @@ export default function StallDashboard() {
           quantity: item.quantity
         }));
 
-        const res = await fetch('http://localhost:3001/send-receipt', {
+        const botUrl = process.env.NEXT_PUBLIC_BOT_URL || 'http://localhost:3001';
+        const res = await fetch(`${botUrl}/send-receipt`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
