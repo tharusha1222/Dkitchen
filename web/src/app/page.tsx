@@ -243,8 +243,8 @@ export default function Home() {
       {/* Accompaniment Selector Modal */}
       {selectedItem && (
         <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center p-0 md:p-4 bg-black/80 backdrop-blur-md">
-          <div className="glass-panel rounded-t-3xl md:rounded-2xl w-full md:max-w-md shadow-2xl max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
+          <div className="glass-panel rounded-t-3xl md:rounded-2xl w-full md:max-w-md shadow-2xl max-h-[90vh] flex flex-col">
+            <div className="p-6 overflow-y-auto flex-1">
               <div className="flex items-start justify-between mb-1">
                 <h2 className="text-xl font-bold">{selectedItem.name}</h2>
                 <button onClick={() => setSelectedItem(null)} className="text-white/70 hover:text-white transition-colors ml-4">
@@ -312,7 +312,8 @@ export default function Home() {
                   ) : null;
                 })()}
               </div>
-
+            </div>
+            <div className="p-6 pt-4 border-t border-white/10 bg-neutral-900/80 backdrop-blur-xl shrink-0 rounded-b-2xl">
               <button
                 onClick={confirmAddToCart}
                 className="w-full py-3.5 rounded-xl bg-brand-gold text-black font-extrabold hover:shadow-[0_0_15px_rgba(212,160,23,0.4)] transition-all active:scale-[0.98]"

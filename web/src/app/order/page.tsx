@@ -204,38 +204,40 @@ export default function OrderPage() {
             <div className="lg:col-span-2 space-y-4">
               {cart.map((item) => (
                 <div key={item.cartKey} className="glass-card bg-black/40 p-5 rounded-2xl border border-white/5 hover:border-white/10 transition-colors">
-                  <div className="flex items-start justify-between gap-5">
-                    {/* Item Icon */}
-                    <div className="w-14 h-14 rounded-xl bg-brand-gold/10 flex items-center justify-center shrink-0 border border-brand-gold/20 overflow-hidden">
-                      {item.image_url ? (
-                        <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
-                      ) : (
-                        <Soup className="w-7 h-7 text-brand-gold" />
-                      )}
-                    </div>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-5">
+                    <div className="flex items-start gap-4 flex-1 min-w-0">
+                      {/* Item Icon */}
+                      <div className="w-14 h-14 rounded-xl bg-brand-gold/10 flex items-center justify-center shrink-0 border border-brand-gold/20 overflow-hidden">
+                        {item.image_url ? (
+                          <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
+                        ) : (
+                          <Soup className="w-7 h-7 text-brand-gold" />
+                        )}
+                      </div>
 
-                    {/* Info */}
-                    <div className="flex-1 min-w-0 pt-1">
-                      <h3 className="font-bold text-lg leading-tight text-white/90">{item.name}</h3>
-                      <p className="text-brand-gold font-bold mt-1">Rs. {(item.price * item.quantity).toFixed(2)}</p>
+                      {/* Info */}
+                      <div className="flex-1 min-w-0 pt-1">
+                        <h3 className="font-bold text-lg leading-tight text-white/90">{item.name}</h3>
+                        <p className="text-brand-gold font-bold mt-1">Rs. {(item.price * item.quantity).toFixed(2)}</p>
 
-                      {/* Accompaniments */}
-                      {(item.selectedAccomps?.length ?? 0) > 0 && (
-                        <div className="mt-2 flex flex-wrap gap-1.5">
-                          <span className="flex items-center gap-1 text-xs text-white/50">
-                            <Soup className="w-3 h-3" />
-                          </span>
-                          {item.selectedAccomps?.map(a => (
-                            <span key={a.id} className={`text-xs px-2 py-0.5 rounded-full font-medium ${typeColors[a.type]}`}>
-                              {a.name}
+                        {/* Accompaniments */}
+                        {(item.selectedAccomps?.length ?? 0) > 0 && (
+                          <div className="mt-2 flex flex-wrap gap-1.5">
+                            <span className="flex items-center gap-1 text-xs text-white/50">
+                              <Soup className="w-3 h-3" />
                             </span>
-                          ))}
-                        </div>
-                      )}
+                            {item.selectedAccomps?.map(a => (
+                              <span key={a.id} className={`text-xs px-2 py-0.5 rounded-full font-medium ${typeColors[a.type]}`}>
+                                {a.name}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     </div>
 
                     {/* Qty controls + delete */}
-                    <div className="flex items-center gap-2 shrink-0">
+                    <div className="flex items-center justify-between sm:justify-end w-full sm:w-auto gap-2 shrink-0">
                       <div className="flex items-center gap-1 bg-neutral-900 rounded-lg border border-white/10 overflow-hidden">
                         <button
                           onClick={() => updateQuantity(item.cartKey, -1)}

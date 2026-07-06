@@ -383,12 +383,12 @@ export default function AdminDashboard() {
         </div>
 
         {/* Tab Bar */}
-        <div className="max-w-5xl mx-auto px-4 md:px-8 flex gap-1 pb-0">
+        <div className="max-w-5xl mx-auto px-4 md:px-8 flex gap-1 pb-0 overflow-x-auto whitespace-nowrap scrollbar-hide">
           {tabs.map(tab => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-5 py-3 text-sm font-semibold border-b-2 transition-all ${
+              className={`flex items-center gap-2 px-5 py-3 text-sm font-semibold border-b-2 transition-all shrink-0 ${
                 activeTab === tab.id
                   ? 'border-brand-gold text-brand-gold'
                   : 'border-transparent text-white/50 hover:text-white/80'
@@ -485,9 +485,9 @@ export default function AdminDashboard() {
                     <input type="text" placeholder="e.g. Dhal Curry, BBQ Sauce" value={newAccompInput.name}
                       onChange={e => setNewAccompInput({ ...newAccompInput, name: e.target.value })}
                       onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addAccompToNewItem(); } }}
-                      className="bg-neutral-900 border border-white/10 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brand-gold transition-colors" />
+                      className="bg-neutral-900 border border-white/10 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brand-gold transition-colors w-full" />
                     <select value={newAccompInput.type} onChange={e => setNewAccompInput({ ...newAccompInput, type: e.target.value as any })}
-                      className="bg-neutral-900 border border-white/10 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-brand-gold transition-colors">
+                      className="bg-neutral-900 border border-white/10 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-brand-gold transition-colors w-full sm:w-auto">
                       <option value="curry">Curry</option>
                       <option value="sauce">Sauce</option>
                       <option value="side">Side</option>
@@ -495,9 +495,9 @@ export default function AdminDashboard() {
                     <input type="number" step="0.01" min="0" placeholder="Extra price"
                       value={newAccompInput.price}
                       onChange={e => setNewAccompInput({ ...newAccompInput, price: e.target.value })}
-                      className="w-32 bg-neutral-900 border border-white/10 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-brand-gold transition-colors" />
+                      className="bg-neutral-900 border border-white/10 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-brand-gold transition-colors w-full sm:w-32" />
                     <button type="button" onClick={addAccompToNewItem}
-                      className="bg-white/10 hover:bg-brand-gold hover:text-black text-white px-4 py-2.5 rounded-xl font-bold transition-colors">
+                      className="bg-white/10 hover:bg-brand-gold hover:text-black text-white px-4 py-2.5 rounded-xl font-bold transition-colors w-full sm:w-auto flex justify-center items-center">
                       <Plus className="w-4 h-4" />
                     </button>
                   </div>
@@ -821,9 +821,9 @@ function AccompanimentPanel({ item, typeColors, onToggle, onDelete, onAdd }: {
         <input type="text" placeholder="Name (e.g. Dhal Curry)" value={name}
           onChange={e => setName(e.target.value)}
           onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleAdd(); } }}
-          className="bg-black/40 border border-white/10 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-brand-gold transition-colors" />
+          className="bg-black/40 border border-white/10 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-brand-gold transition-colors w-full" />
         <select value={type} onChange={e => setType(e.target.value as any)}
-          className="bg-black/40 border border-white/10 rounded-lg px-2 py-1.5 text-sm focus:outline-none">
+          className="bg-black/40 border border-white/10 rounded-lg px-2 py-1.5 text-sm focus:outline-none w-full sm:w-auto">
           <option value="curry">Curry</option>
           <option value="sauce">Sauce</option>
           <option value="side">Side</option>
@@ -831,9 +831,9 @@ function AccompanimentPanel({ item, typeColors, onToggle, onDelete, onAdd }: {
         <input type="number" step="0.01" min="0" placeholder="Price (0=free)"
           value={price}
           onChange={e => setPrice(e.target.value)}
-          className="w-28 bg-black/40 border border-white/10 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-brand-gold transition-colors" />
+          className="bg-black/40 border border-white/10 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-brand-gold transition-colors w-full sm:w-28" />
         <button type="button" onClick={handleAdd}
-          className="bg-brand-gold/20 text-brand-gold hover:bg-brand-gold hover:text-black px-3 rounded-lg transition-colors font-bold text-sm">
+          className="bg-brand-gold/20 text-brand-gold hover:bg-brand-gold hover:text-black px-3 py-2 rounded-lg transition-colors font-bold text-sm w-full sm:w-auto flex justify-center items-center">
           <Plus className="w-4 h-4" />
         </button>
       </div>
