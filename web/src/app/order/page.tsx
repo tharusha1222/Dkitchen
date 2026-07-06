@@ -310,12 +310,12 @@ export default function OrderPage() {
                         value={promoCodeInput}
                         onChange={(e) => setPromoCodeInput(e.target.value.toUpperCase())}
                         placeholder="Enter code"
-                        className="flex-1 bg-neutral-900 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-gold transition-colors text-white uppercase"
+                        className="flex-1 min-w-0 w-full bg-neutral-900 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-gold transition-colors text-white uppercase"
                       />
                       <button
                         onClick={applyPromo}
                         disabled={checkingPromo || !promoCodeInput.trim()}
-                        className="px-6 py-3 bg-white/10 text-white font-bold rounded-xl hover:bg-neutral-600 disabled:opacity-50 transition-colors flex items-center justify-center min-w-[100px]"
+                        className="px-4 py-3 bg-white/10 text-white font-bold rounded-xl hover:bg-neutral-600 disabled:opacity-50 transition-colors flex items-center justify-center shrink-0"
                       >
                         {checkingPromo ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Apply'}
                       </button>
