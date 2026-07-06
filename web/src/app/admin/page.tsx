@@ -58,6 +58,7 @@ export default function AdminDashboard() {
   
   // Accompaniments for the new item being created
   const [newAccompaniments, setNewAccompaniments] = useState<{ name: string; type: 'curry' | 'sauce' | 'side'; price: number }[]>([]);
+  const [activeTab, setActiveTab] = useState('bot');
   const [newAccompInput, setNewAccompInput] = useState({ name: '', type: 'curry' as 'curry' | 'sauce' | 'side', price: '' });
 
   // Promo Blast state
@@ -111,21 +112,33 @@ export default function AdminDashboard() {
   };
 
   const updateOrderStatus = async (id: string, status: string) => {
-    const { error } = await supabase.from('orders').update({ status }).eq('id', id);
-    if (!error) {
+    const adminPassword = sessionStorage.getItem('adminPassword') || '';
+    const res = await fetch('/api/update-order-status', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderId: id, status, password: adminPassword })
+    });
+    const updateData = await res.json();
+    if (updateData.success) {
       fetchAllOrders();
     } else {
-      alert('Failed to update status: ' + error.message);
+      alert('Failed to update status: ' + updateData.error);
     }
   };
 
   const handleClearAllOrders = async () => {
     if (!window.confirm('Are you sure you want to delete ALL orders? This action cannot be undone and will permanently delete all order history.')) return;
     
-    const { error } = await supabase.from('orders').delete().not('id', 'is', null);
+    const adminPassword = sessionStorage.getItem('adminPassword') || '';
+    const res = await fetch('/api/update-order-status', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderId: 'ALL', status: 'clearAll', password: adminPassword })
+    });
+    const updateData = await res.json();
     
-    if (error) {
-      alert('Failed to clear orders: ' + error.message);
+    if (!updateData.success) {
+      alert('Failed to clear orders: ' + updateData.error);
     } else {
       setAllOrders([]);
       fetchAnalytics();
@@ -155,11 +168,12 @@ export default function AdminDashboard() {
       if (data.success) {
         setIsAuthenticated(true);
         sessionStorage.setItem('adminAuth', 'true');
+        sessionStorage.setItem('adminPassword', adminPasswordInput);
       } else {
-        setAuthError(data.error || 'Invalid password');
+        setAuthError(data.error || 'Incorrect password');
       }
     } catch (err) {
-      setAuthError('Error verifying password');
+      setAuthError('An error occurred. Please try again.');
     }
   };
 
@@ -377,7 +391,7 @@ export default function AdminDashboard() {
     { id: 'analytics', label: 'Analytics',  icon: '📈' },
     { id: 'security', label: 'Security', icon: '🔒' },
   ];
-  const [activeTab, setActiveTab] = useState('bot');
+
 
   if (!isAuthenticated) {
     return (

@@ -35,6 +35,7 @@ export default function StallDashboard() {
       if (stallPasswordInput === data.value) {
         setIsAuthenticated(true);
         sessionStorage.setItem('stallAuth', 'true');
+        sessionStorage.setItem('stallPassword', stallPasswordInput);
       } else {
         setAuthError('Incorrect password');
       }
@@ -83,10 +84,18 @@ export default function StallDashboard() {
 
     try {
       // 1. Update order in DB
-      await supabase
-        .from('orders')
-        .update({ status: 'completed' })
-        .eq('id', orderData.id);
+      const stallPassword = sessionStorage.getItem('stallPassword') || '';
+      const updateRes = await fetch('/api/update-order-status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          orderId: orderData.id,
+          status: 'completed',
+          password: stallPassword
+        })
+      });
+      const updateData = await updateRes.json();
+      if (!updateData.success) throw new Error(updateData.error || 'Failed to update order');
 
       // 2. Send "Order Complete" notification via WhatsApp
       const phone = orderData.profiles?.phone_number;

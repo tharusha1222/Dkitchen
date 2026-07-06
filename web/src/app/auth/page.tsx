@@ -57,25 +57,25 @@ export default function AuthPage() {
     setLoading(true);
     setError('');
     try {
-      const { data } = await supabase
-        .from('otps')
-        .select('*')
-        .eq('phone_number', phoneNumber)
-        .eq('otp_code', otp)
-        .single();
+      const res = await fetch('/api/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phoneNumber, otp, fullName })
+      });
+      const data = await res.json();
+      
+      if (!data.success) {
+        throw new Error(data.error || 'Invalid OTP');
+      }
 
-      if (!data) throw new Error('Invalid OTP code. Please try again.');
-      if (new Date(data.expires_at) < new Date()) throw new Error('OTP has expired. Please request a new one.');
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        phone: data.phone,
+        password: data.password
+      });
 
-      await supabase.from('profiles').upsert({
-        phone_number: phoneNumber,
-        full_name: fullName,
-        role: 'student',
-      }, { onConflict: 'phone_number' });
+      if (signInError) throw signInError;
 
-      await supabase.from('otps').delete().eq('phone_number', phoneNumber);
-
-      localStorage.setItem('canteen_user_phone', phoneNumber);
+      localStorage.setItem('canteen_user_phone', data.phone);
       localStorage.setItem('canteen_user_name', fullName);
 
       router.push('/');
