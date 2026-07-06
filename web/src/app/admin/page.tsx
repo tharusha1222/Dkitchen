@@ -360,6 +360,19 @@ export default function AdminDashboard() {
                   <CheckCircle2 className="w-12 h-12 text-green-500" />
                   <p className="text-green-400 font-bold text-lg">WhatsApp Bot is Connected!</p>
                   <p className="text-white/50 text-sm">The bot is ready to send OTPs, receipts, and broadcast messages.</p>
+                  <button 
+                    onClick={async () => {
+                      const res = await fetch('/api/disconnect', { method: 'POST' });
+                      if (res.ok) {
+                        checkBotStatus();
+                      } else {
+                        alert('Failed to disconnect');
+                      }
+                    }}
+                    className="mt-4 bg-red-500/20 text-red-400 hover:bg-red-500/30 px-6 py-2 rounded-xl font-bold transition-colors border border-red-500/30"
+                  >
+                    Disconnect Device
+                  </button>
                 </div>
               )}
             </div>

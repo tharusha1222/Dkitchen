@@ -35,6 +35,13 @@ export function cleanPhone(phoneNumber: string) {
   return phoneNumber.replace(/\D/g, '');
 }
 
+export async function disconnectWhatsApp() {
+  if (global.__waSock) {
+    await global.__waSock.logout();
+    global.__waSock = null;
+  }
+}
+
 async function initWhatsApp() {
   if (global.__waConnecting) return;
   global.__waConnecting = true;
@@ -52,12 +59,8 @@ async function initWhatsApp() {
       if (connection === 'close') {
         global.__waConnecting = false;
         global.__waSock = null;
-        const code = (lastDisconnect?.error as any)?.output?.statusCode;
-        if (code !== DisconnectReason.loggedOut) {
-          setTimeout(initWhatsApp, 3000);
-        } else {
-          global.__waQrCode = null;
-        }
+        global.__waQrCode = null;
+        setTimeout(initWhatsApp, 3000);
       } else if (connection === 'open') {
         global.__waQrCode = null;
         global.__waConnecting = false;
