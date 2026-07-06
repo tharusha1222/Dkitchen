@@ -132,6 +132,9 @@ export default function AdminDashboard() {
       .select('*, order_items(*, menu_items(name)), stalls(name)')
       .eq('status', 'completed');
 
+    if (error) {
+      console.error("fetchAnalytics error:", error);
+    }
     if (error || !orders) return;
 
     let totalRev = 0;
@@ -139,14 +142,14 @@ export default function AdminDashboard() {
     const stallsMap: Record<string, number> = {};
 
     orders.forEach(o => {
-      totalRev += o.total_amount;
+      totalRev += o.total_amount || 0;
       
       const stallName = o.stalls?.name || 'Unknown';
-      stallsMap[stallName] = (stallsMap[stallName] || 0) + o.total_amount;
+      stallsMap[stallName] = (stallsMap[stallName] || 0) + (o.total_amount || 0);
 
-      o.order_items.forEach((oi: any) => {
+      (o.order_items || []).forEach((oi: any) => {
         const itemName = oi.menu_items?.name || 'Unknown';
-        itemsMap[itemName] = (itemsMap[itemName] || 0) + oi.quantity;
+        itemsMap[itemName] = (itemsMap[itemName] || 0) + (oi.quantity || 1);
       });
     });
 
@@ -684,52 +687,64 @@ export default function AdminDashboard() {
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div className="bg-black/40 p-6 rounded-2xl border border-white/10">
                       <h3 className="text-lg font-bold mb-6">Top Selling Items</h3>
-                      <div className="h-64">
-                        <ResponsiveContainer width="100%" height="100%">
-                          <BarChart data={analyticsData.topItems} layout="vertical" margin={{ top: 0, right: 0, left: 40, bottom: 0 }}>
-                            <XAxis type="number" hide />
-                            <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fill: '#a3a3a3' }} width={100} />
-                            <Tooltip cursor={{ fill: '#333' }} contentStyle={{ backgroundColor: '#171717', border: 'none', borderRadius: '8px' }} />
-                            <Bar dataKey="value" fill="#f97316" radius={[0, 4, 4, 0]} />
-                          </BarChart>
-                        </ResponsiveContainer>
-                      </div>
+                      {analyticsData.topItems.length > 0 ? (
+                        <div className="h-64">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={analyticsData.topItems} layout="vertical" margin={{ top: 0, right: 0, left: 40, bottom: 0 }}>
+                              <XAxis type="number" hide />
+                              <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fill: '#a3a3a3' }} width={100} />
+                              <Tooltip cursor={{ fill: '#333' }} contentStyle={{ backgroundColor: '#171717', border: 'none', borderRadius: '8px' }} />
+                              <Bar dataKey="value" fill="#f97316" radius={[0, 4, 4, 0]} />
+                            </BarChart>
+                          </ResponsiveContainer>
+                        </div>
+                      ) : (
+                        <div className="h-64 flex items-center justify-center text-white/50">
+                          No sales data yet.
+                        </div>
+                      )}
                     </div>
                     
                     <div className="bg-black/40 p-6 rounded-2xl border border-white/10">
                       <h3 className="text-lg font-bold mb-6">Revenue by Stall</h3>
-                      <div className="h-64">
-                        <ResponsiveContainer width="100%" height="100%">
-                          <PieChart>
-                            <Pie
-                              data={analyticsData.stallData}
-                              cx="50%"
-                              cy="50%"
-                              innerRadius={60}
-                              outerRadius={80}
-                              paddingAngle={5}
-                              dataKey="value"
-                            >
-                              {analyticsData.stallData.map((entry: any, index: number) => {
-                                const COLORS = ['#f97316', '#eab308', '#ef4444', '#10b981', '#3b82f6'];
-                                return <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />;
-                              })}
-                            </Pie>
-                            <Tooltip contentStyle={{ backgroundColor: '#171717', border: 'none', borderRadius: '8px' }} />
-                          </PieChart>
-                        </ResponsiveContainer>
-                        <div className="flex justify-center flex-wrap gap-4 mt-4">
-                          {analyticsData.stallData.map((entry: any, index: number) => {
-                            const COLORS = ['#f97316', '#eab308', '#ef4444', '#10b981', '#3b82f6'];
-                            return (
-                              <div key={entry.name} className="flex items-center gap-2 text-sm text-white/60">
-                                <span className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }} />
-                                {entry.name}
-                              </div>
-                            );
-                          })}
+                      {analyticsData.stallData.length > 0 ? (
+                        <div className="h-64">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                              <Pie
+                                data={analyticsData.stallData}
+                                cx="50%"
+                                cy="50%"
+                                innerRadius={60}
+                                outerRadius={80}
+                                paddingAngle={5}
+                                dataKey="value"
+                              >
+                                {analyticsData.stallData.map((entry: any, index: number) => {
+                                  const COLORS = ['#f97316', '#eab308', '#ef4444', '#10b981', '#3b82f6'];
+                                  return <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />;
+                                })}
+                              </Pie>
+                              <Tooltip contentStyle={{ backgroundColor: '#171717', border: 'none', borderRadius: '8px' }} />
+                            </PieChart>
+                          </ResponsiveContainer>
+                          <div className="flex justify-center flex-wrap gap-4 mt-4">
+                            {analyticsData.stallData.map((entry: any, index: number) => {
+                              const COLORS = ['#f97316', '#eab308', '#ef4444', '#10b981', '#3b82f6'];
+                              return (
+                                <div key={entry.name} className="flex items-center gap-2 text-sm text-white/60">
+                                  <span className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }} />
+                                  {entry.name}
+                                </div>
+                              );
+                            })}
+                          </div>
                         </div>
-                      </div>
+                      ) : (
+                        <div className="h-64 flex items-center justify-center text-white/50">
+                          No revenue data yet.
+                        </div>
+                      )}
                     </div>
                   </div>
                 </>
