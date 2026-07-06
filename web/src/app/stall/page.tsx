@@ -56,7 +56,7 @@ export default function StallDashboard() {
           *,
           profiles(phone_number),
           stalls(name),
-          order_items(quantity, price_at_time, menu_items(name))
+          order_items(quantity, price_at_time, notes, menu_items(name))
         `)
         .eq('qr_token', token)
         .single();
@@ -242,8 +242,15 @@ export default function StallDashboard() {
                   <h3 className="font-bold mb-3 text-white/80">Items:</h3>
                   <ul className="space-y-2">
                     {orderData.order_items.map((item: any, idx: number) => (
-                      <li key={idx} className="flex justify-between bg-neutral-900 p-3 rounded-lg border border-white/10">
-                        <span>{item.quantity}x {item.menu_items?.name}</span>
+                      <li key={idx} className="flex flex-col bg-neutral-900 p-3 rounded-lg border border-white/10">
+                        <div className="flex justify-between font-medium text-white/90">
+                          <span>{item.quantity}x {item.menu_items?.name}</span>
+                        </div>
+                        {item.notes && (
+                          <div className="text-xs text-brand-gold/70 mt-1 pl-6 leading-relaxed">
+                            + {item.notes}
+                          </div>
+                        )}
                       </li>
                     ))}
                   </ul>

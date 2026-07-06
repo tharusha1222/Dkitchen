@@ -106,7 +106,7 @@ export default function AdminDashboard() {
   const fetchAllOrders = async () => {
     const { data } = await supabase
       .from('orders')
-      .select('*, profiles(phone_number, full_name), stalls(name), order_items(quantity, price_at_time, menu_items(name))')
+      .select('*, profiles(phone_number, full_name), stalls(name), order_items(quantity, price_at_time, notes, menu_items(name))')
       .order('created_at', { ascending: false });
     if (data) setAllOrders(data);
   };
@@ -570,12 +570,19 @@ export default function AdminDashboard() {
                       <h4 className="text-xs font-bold text-white/40 mb-3 uppercase tracking-wider">Order Items</h4>
                       <div className="space-y-2">
                         {(order.order_items || []).map((item: any, i: number) => (
-                          <div key={i} className="flex justify-between items-center text-sm">
-                            <div className="flex items-center gap-2">
-                              <span className="bg-brand-gold/10 text-brand-gold font-bold px-2 py-0.5 rounded-md text-xs">{item.quantity}x</span> 
-                              <span className="text-white/90 font-medium">{item.menu_items?.name || 'Unknown Item'}</span>
+                          <div key={i} className="flex flex-col gap-1 text-sm border-b border-white/5 pb-2 last:border-0 last:pb-0">
+                            <div className="flex justify-between items-start">
+                              <div className="flex items-center gap-2">
+                                <span className="bg-brand-gold/10 text-brand-gold font-bold px-2 py-0.5 rounded-md text-xs mt-0.5">{item.quantity}x</span> 
+                                <span className="text-white/90 font-medium leading-snug">{item.menu_items?.name || 'Unknown Item'}</span>
+                              </div>
+                              <span className="text-white/60 font-medium whitespace-nowrap ml-2">Rs. {(item.price_at_time * item.quantity).toFixed(2)}</span>
                             </div>
-                            <span className="text-white/60 font-medium">Rs. {(item.price_at_time * item.quantity).toFixed(2)}</span>
+                            {item.notes && (
+                              <div className="text-xs text-brand-gold/70 pl-8 leading-relaxed">
+                                + {item.notes}
+                              </div>
+                            )}
                           </div>
                         ))}
                       </div>
