@@ -206,8 +206,12 @@ export default function OrderPage() {
                 <div key={item.cartKey} className="glass-card bg-black/40 p-5 rounded-2xl border border-white/5 hover:border-white/10 transition-colors">
                   <div className="flex items-start justify-between gap-5">
                     {/* Item Icon */}
-                    <div className="w-14 h-14 rounded-xl bg-brand-gold/10 flex items-center justify-center shrink-0 border border-brand-gold/20">
-                      <Soup className="w-7 h-7 text-brand-gold" />
+                    <div className="w-14 h-14 rounded-xl bg-brand-gold/10 flex items-center justify-center shrink-0 border border-brand-gold/20 overflow-hidden">
+                      {item.image_url ? (
+                        <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <Soup className="w-7 h-7 text-brand-gold" />
+                      )}
                     </div>
 
                     {/* Info */}

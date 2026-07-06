@@ -15,6 +15,7 @@ export type CartItem = {
   name: string;
   price: number;
   quantity: number;
+  image_url?: string;
   selectedAccomps: Accompaniment[];
 };
 
@@ -61,6 +62,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         name: item.name,
         price: item.price,
         quantity: 1,
+        image_url: item.image_url,
         selectedAccomps: accomps,
       }];
     });
