@@ -82,17 +82,20 @@ export default function AdminDashboard() {
   useEffect(() => {
     checkBotStatus();
     const interval = setInterval(checkBotStatus, 5000);
-    fetchMenu();
-    fetchOffers();
-    fetchStalls();
-    fetchAnalytics();
-    fetchAllOrders();
     fetchStallPassword();
     if (sessionStorage.getItem('adminAuth') === 'true') {
       setIsAuthenticated(true);
     }
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    if (activeTab === 'menu') fetchMenu();
+    else if (activeTab === 'promos') fetchOffers();
+    else if (activeTab === 'stalls') fetchStalls();
+    else if (activeTab === 'analytics') fetchAnalytics();
+    else if (activeTab === 'orders') fetchAllOrders();
+  }, [activeTab]);
 
   const fetchStallPassword = async () => {
     const { data } = await supabase.from('settings').select('value').eq('key', 'stall_password').single();
@@ -105,6 +108,15 @@ export default function AdminDashboard() {
       .select('*, profiles(phone_number, full_name), stalls(name), order_items(quantity, price_at_time, menu_items(name))')
       .order('created_at', { ascending: false });
     if (data) setAllOrders(data);
+  };
+
+  const updateOrderStatus = async (id: string, status: string) => {
+    const { error } = await supabase.from('orders').update({ status }).eq('id', id);
+    if (!error) {
+      fetchAllOrders();
+    } else {
+      alert('Failed to update status: ' + error.message);
+    }
   };
 
   const handleClearAllOrders = async () => {
@@ -521,6 +533,18 @@ export default function AdminDashboard() {
                           <span className="text-white/20">|</span>
                           <span>📱 {order.profiles?.phone_number || 'N/A'}</span>
                         </p>
+                        <div className="mt-3 flex gap-2">
+                          {order.status !== 'completed' && (
+                            <button onClick={() => updateOrderStatus(order.id, 'completed')} className="text-xs bg-green-500/20 text-green-400 px-3 py-1.5 rounded-lg font-bold hover:bg-green-500/30 transition-colors">
+                              Mark Completed
+                            </button>
+                          )}
+                          {order.status !== 'cancelled' && (
+                            <button onClick={() => updateOrderStatus(order.id, 'cancelled')} className="text-xs bg-red-500/20 text-red-400 px-3 py-1.5 rounded-lg font-bold hover:bg-red-500/30 transition-colors">
+                              Cancel Order
+                            </button>
+                          )}
+                        </div>
                       </div>
                       <div className="text-left md:text-right">
                         <div className="text-xl font-extrabold text-brand-gold">Rs. {Number(order.total_amount || 0).toFixed(2)}</div>
