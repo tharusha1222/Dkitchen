@@ -37,8 +37,7 @@ export default function AuthPage() {
         expires_at: expiresAt.toISOString(),
       });
 
-      const botUrl = process.env.NEXT_PUBLIC_BOT_URL || 'http://localhost:3001';
-      const res = await fetch(`${botUrl}/send-otp`, {
+      const res = await fetch('/api/send-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phoneNumber, otp: generatedOtp, name: fullName }),

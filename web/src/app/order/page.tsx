@@ -126,8 +126,7 @@ export default function OrderPage() {
             })),
           }));
 
-          const botUrl = process.env.NEXT_PUBLIC_BOT_URL || 'http://localhost:3001';
-          await fetch(`${botUrl}/send-qr`, {
+          await fetch('/api/send-qr', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
