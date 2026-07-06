@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useCart } from '@/components/CartProvider';
 import { supabase } from '@/lib/supabase';
 import { QRCodeSVG } from 'qrcode.react';
-import { ArrowLeft, Trash2, CheckCircle2, Loader2, Minus, Plus, Soup, X } from 'lucide-react';
+import { ArrowLeft, Trash2, CheckCircle2, Loader2, Minus, Plus, Soup, X, ShoppingCart, MapPin, Receipt, Ticket } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
@@ -189,9 +189,12 @@ export default function OrderPage() {
         </div>
 
         {cart.length === 0 ? (
-          <div className="text-center py-20 glass-card rounded-2xl border border-white/10">
-            <p className="text-xl text-white/60 mb-6">Your cart is empty.</p>
-            <Link href="/" className="inline-block px-8 py-3 rounded-xl bg-brand-gold text-black font-bold hover:bg-orange-400 transition-colors">
+          <div className="text-center py-24 glass-card rounded-3xl border border-white/10 flex flex-col items-center justify-center">
+            <div className="w-24 h-24 bg-white/5 rounded-full flex items-center justify-center mb-6">
+              <ShoppingCart className="w-12 h-12 text-white/20" />
+            </div>
+            <p className="text-xl text-white/60 mb-8 font-medium">Your cart is empty.</p>
+            <Link href="/" className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-brand-gold text-black font-bold hover:bg-orange-400 transition-colors shadow-[0_0_15px_rgba(212,160,23,0.2)]">
               Browse Menu
             </Link>
           </div>
@@ -200,12 +203,17 @@ export default function OrderPage() {
             {/* Cart items */}
             <div className="lg:col-span-2 space-y-4">
               {cart.map((item) => (
-                <div key={item.cartKey} className="bg-black/40 p-4 rounded-xl border border-white/10">
-                  <div className="flex items-start justify-between gap-4">
+                <div key={item.cartKey} className="glass-card bg-black/40 p-5 rounded-2xl border border-white/5 hover:border-white/10 transition-colors">
+                  <div className="flex items-start justify-between gap-5">
+                    {/* Item Icon */}
+                    <div className="w-14 h-14 rounded-xl bg-brand-gold/10 flex items-center justify-center shrink-0 border border-brand-gold/20">
+                      <Soup className="w-7 h-7 text-brand-gold" />
+                    </div>
+
                     {/* Info */}
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-bold text-lg leading-tight">{item.name}</h3>
-                      <p className="text-brand-gold font-bold text-sm mt-0.5">Rs. {(item.price * item.quantity).toFixed(2)}</p>
+                    <div className="flex-1 min-w-0 pt-1">
+                      <h3 className="font-bold text-lg leading-tight text-white/90">{item.name}</h3>
+                      <p className="text-brand-gold font-bold mt-1">Rs. {(item.price * item.quantity).toFixed(2)}</p>
 
                       {/* Accompaniments */}
                       {(item.selectedAccomps?.length ?? 0) > 0 && (
@@ -252,12 +260,16 @@ export default function OrderPage() {
             </div>
 
             {/* Summary */}
-            <div className="bg-black/40 p-6 rounded-2xl border border-white/10 h-fit sticky top-24">
-              <h3 className="text-xl font-bold mb-6">Order Summary</h3>
+            <div className="glass-card bg-black/40 p-6 rounded-3xl border border-white/10 h-fit sticky top-24">
+              <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
+                <Receipt className="w-6 h-6 text-brand-gold" />
+                Order Summary
+              </h3>
               
               {/* Stall Selection */}
-              <div className="mb-6">
-                <label className="block text-sm font-semibold text-white/80 mb-2">
+              <div className="mb-6 bg-white/5 p-5 rounded-2xl border border-white/5">
+                <label className="flex items-center gap-2 text-sm font-semibold text-white/80 mb-3">
+                  <MapPin className="w-4 h-4 text-brand-gold" />
                   Collection Stall
                 </label>
                 <select
@@ -275,8 +287,9 @@ export default function OrderPage() {
                 </select>
               </div>
               {/* Promo Code */}
-              <div className="mb-6">
-                <label className="block text-sm font-semibold text-white/80 mb-2">
+              <div className="mb-6 bg-white/5 p-5 rounded-2xl border border-white/5">
+                <label className="flex items-center gap-2 text-sm font-semibold text-white/80 mb-3">
+                  <Ticket className="w-4 h-4 text-brand-gold" />
                   Promo Code
                 </label>
                 {appliedPromo ? (
