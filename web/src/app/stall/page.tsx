@@ -132,7 +132,7 @@ export default function StallDashboard() {
       <div className="min-h-screen bg-[#061208] flex items-center justify-center p-4">
         <form onSubmit={handleStallLogin} className="glass-card p-8 rounded-2xl w-full max-w-sm border border-brand-gold/20 shadow-[0_0_20px_rgba(212,160,23,0.15)]">
           <div className="flex justify-center mb-6">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-brand-gold to-yellow-600 flex items-center justify-center font-bold text-black text-2xl shadow-[0_0_15px_rgba(212,160,23,0.4)]">S</div>
+            <img src="/logo.png" alt="DKitchen Stall" className="w-20 h-20 rounded-full object-cover border-2 border-brand-gold/40 shadow-[0_0_15px_rgba(212,160,23,0.4)]" />
           </div>
           <h2 className="text-2xl font-bold mb-6 text-white text-center">Stall Login</h2>
           <input
