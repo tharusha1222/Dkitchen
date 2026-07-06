@@ -44,6 +44,13 @@ function Toggle({ checked, onChange }: { checked: boolean; onChange: () => void 
 }
 
 export default function AdminDashboard() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [adminPasswordInput, setAdminPasswordInput] = useState('');
+  const [authError, setAuthError] = useState('');
+  
+  const [stallPasswordInput, setStallPasswordInput] = useState('');
+  const [passwordUpdateMsg, setPasswordUpdateMsg] = useState('');
+
   const [botStatus, setBotStatus] = useState<{ connected: boolean; qr: string | null }>({ connected: false, qr: null });
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [expandedItemId, setExpandedItemId] = useState<string | null>(null);
@@ -76,8 +83,48 @@ export default function AdminDashboard() {
     fetchOffers();
     fetchStalls();
     fetchAnalytics();
+    fetchStallPassword();
+    if (sessionStorage.getItem('adminAuth') === 'true') {
+      setIsAuthenticated(true);
+    }
     return () => clearInterval(interval);
   }, []);
+
+  const fetchStallPassword = async () => {
+    const { data } = await supabase.from('settings').select('value').eq('key', 'stall_password').single();
+    if (data) setStallPasswordInput(data.value);
+  };
+
+  const updateStallPassword = async () => {
+    const { error } = await supabase.from('settings').upsert({ key: 'stall_password', value: stallPasswordInput });
+    if (!error) {
+      setPasswordUpdateMsg('Password updated successfully!');
+      setTimeout(() => setPasswordUpdateMsg(''), 3000);
+    } else {
+      setPasswordUpdateMsg('Error updating password.');
+    }
+  };
+
+  const handleAdminLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthError('');
+    try {
+      const res = await fetch('/api/verify-admin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: adminPasswordInput })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setIsAuthenticated(true);
+        sessionStorage.setItem('adminAuth', 'true');
+      } else {
+        setAuthError(data.error || 'Invalid password');
+      }
+    } catch (err) {
+      setAuthError('Error verifying password');
+    }
+  };
 
   const fetchAnalytics = async () => {
     const { data: orders, error } = await supabase
@@ -287,8 +334,33 @@ export default function AdminDashboard() {
     { id: 'stalls', label: 'Stalls',         icon: '🏪' },
     { id: 'promos', label: 'Promos',        icon: '🏷️' },
     { id: 'analytics', label: 'Analytics',  icon: '📈' },
+    { id: 'security', label: 'Security', icon: '🔒' },
   ];
   const [activeTab, setActiveTab] = useState('bot');
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-[#061208] flex items-center justify-center p-4">
+        <form onSubmit={handleAdminLogin} className="glass-card p-8 rounded-2xl w-full max-w-sm border border-brand-gold/20 shadow-[0_0_20px_rgba(212,160,23,0.15)]">
+          <div className="flex justify-center mb-6">
+            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-brand-gold to-yellow-600 flex items-center justify-center font-bold text-black text-2xl shadow-[0_0_15px_rgba(212,160,23,0.4)]">C</div>
+          </div>
+          <h2 className="text-2xl font-bold mb-6 text-white text-center">Admin Login</h2>
+          <input
+            type="password"
+            value={adminPasswordInput}
+            onChange={(e) => setAdminPasswordInput(e.target.value)}
+            className="w-full bg-neutral-900 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-gold mb-4 transition-colors"
+            placeholder="Enter Admin Password"
+          />
+          {authError && <p className="text-red-400 text-sm mb-4 text-center">{authError}</p>}
+          <button type="submit" className="w-full bg-brand-gold text-black font-extrabold py-3 rounded-xl hover:shadow-[0_0_15px_rgba(212,160,23,0.4)] transition-all active:scale-[0.98]">
+            Login
+          </button>
+        </form>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#061208] text-[#fdf0dc]">
@@ -664,6 +736,29 @@ export default function AdminDashboard() {
               )}
             </div>
           )}
+
+        {/* ── SECURITY TAB ── */}
+        {activeTab === 'security' && (
+          <div className="space-y-6">
+            <div className="glass-card rounded-2xl p-6 border border-white/10">
+              <h2 className="text-lg font-bold mb-5 text-brand-gold uppercase tracking-widest text-sm">Security Settings</h2>
+              <div className="bg-neutral-900 border border-white/10 rounded-xl p-5 max-w-lg">
+                <p className="text-white/70 mb-4 text-sm">This password is used to protect the Stall dashboard.</p>
+                <div className="flex gap-2">
+                  <input type="text" placeholder="New Stall Password"
+                    value={stallPasswordInput}
+                    onChange={e => setStallPasswordInput(e.target.value)}
+                    className="flex-1 bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-gold transition-colors" />
+                  <button onClick={updateStallPassword}
+                    className="px-6 py-3 bg-brand-gold text-black font-bold rounded-xl hover:bg-brand-gold/90 transition-colors">
+                    Update
+                  </button>
+                </div>
+                {passwordUpdateMsg && <p className="mt-3 text-sm text-green-400 font-medium">{passwordUpdateMsg}</p>}
+              </div>
+            </div>
+          </div>
+        )}
 
       </div>
     </div>

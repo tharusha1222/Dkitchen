@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Scanner } from '@yudiel/react-qr-scanner';
 import { QrCode, CheckCircle2, Loader2, AlertCircle } from 'lucide-react';
@@ -13,6 +13,35 @@ export default function StallDashboard() {
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
 
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [stallPasswordInput, setStallPasswordInput] = useState('');
+  const [authError, setAuthError] = useState('');
+
+  useEffect(() => {
+    if (sessionStorage.getItem('stallAuth') === 'true') {
+      setIsAuthenticated(true);
+    }
+  }, []);
+
+  const handleStallLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthError('');
+    try {
+      const { data, error } = await supabase.from('settings').select('value').eq('key', 'stall_password').single();
+      if (error || !data) {
+        setAuthError('Error connecting to database or password not set.');
+        return;
+      }
+      if (stallPasswordInput === data.value) {
+        setIsAuthenticated(true);
+        sessionStorage.setItem('stallAuth', 'true');
+      } else {
+        setAuthError('Incorrect password');
+      }
+    } catch (err) {
+      setAuthError('Error verifying password');
+    }
+  };
 
   const handleTokenScanned = async (token: string) => {
     setScannedToken(token);
@@ -97,6 +126,30 @@ export default function StallDashboard() {
       setLoading(false);
     }
   };
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-[#061208] flex items-center justify-center p-4">
+        <form onSubmit={handleStallLogin} className="glass-card p-8 rounded-2xl w-full max-w-sm border border-brand-gold/20 shadow-[0_0_20px_rgba(212,160,23,0.15)]">
+          <div className="flex justify-center mb-6">
+            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-brand-gold to-yellow-600 flex items-center justify-center font-bold text-black text-2xl shadow-[0_0_15px_rgba(212,160,23,0.4)]">S</div>
+          </div>
+          <h2 className="text-2xl font-bold mb-6 text-white text-center">Stall Login</h2>
+          <input
+            type="password"
+            value={stallPasswordInput}
+            onChange={(e) => setStallPasswordInput(e.target.value)}
+            className="w-full bg-neutral-900 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-gold mb-4 transition-colors"
+            placeholder="Enter Stall Password"
+          />
+          {authError && <p className="text-red-400 text-sm mb-4 text-center">{authError}</p>}
+          <button type="submit" className="w-full bg-brand-gold text-black font-extrabold py-3 rounded-xl hover:shadow-[0_0_15px_rgba(212,160,23,0.4)] transition-all active:scale-[0.98]">
+            Login
+          </button>
+        </form>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#061208] text-[#fdf0dc] p-8">
