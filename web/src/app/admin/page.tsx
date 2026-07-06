@@ -72,6 +72,9 @@ export default function AdminDashboard() {
   // Analytics state
   const [analyticsData, setAnalyticsData] = useState<any>(null);
 
+  // Orders state
+  const [allOrders, setAllOrders] = useState<any[]>([]);
+
   // Stalls state
   const [stalls, setStalls] = useState<any[]>([]);
   const [newStall, setNewStall] = useState({ name: '', location: '' });
@@ -83,6 +86,7 @@ export default function AdminDashboard() {
     fetchOffers();
     fetchStalls();
     fetchAnalytics();
+    fetchAllOrders();
     fetchStallPassword();
     if (sessionStorage.getItem('adminAuth') === 'true') {
       setIsAuthenticated(true);
@@ -93,6 +97,14 @@ export default function AdminDashboard() {
   const fetchStallPassword = async () => {
     const { data } = await supabase.from('settings').select('value').eq('key', 'stall_password').single();
     if (data) setStallPasswordInput(data.value);
+  };
+
+  const fetchAllOrders = async () => {
+    const { data } = await supabase
+      .from('orders')
+      .select('*, profiles(phone_number, full_name), stalls(name), order_items(quantity, price_at_time, menu_items(name))')
+      .order('created_at', { ascending: false });
+    if (data) setAllOrders(data);
   };
 
   const updateStallPassword = async () => {
@@ -333,6 +345,7 @@ export default function AdminDashboard() {
 
   const tabs = [
     { id: 'bot',   label: 'Bot Connection', icon: '🤖' },
+    { id: 'orders', label: 'Orders',        icon: '📋' },
     { id: 'menu',  label: 'Menu',           icon: '🍽️' },
     { id: 'stalls', label: 'Stalls',         icon: '🏪' },
     { id: 'promos', label: 'Promos',        icon: '🏷️' },
@@ -450,6 +463,70 @@ export default function AdminDashboard() {
                   </button>
                 </div>
               )}
+            </div>
+          </div>
+        )}
+
+        {/* ── ORDERS TAB ── */}
+        {activeTab === 'orders' && (
+          <div className="space-y-6">
+            <div className="glass-card rounded-2xl p-6 border border-white/10">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-lg font-bold text-brand-gold uppercase tracking-widest text-sm">All Orders ({allOrders.length})</h2>
+                <button onClick={fetchAllOrders} className="text-white/60 text-sm font-bold hover:text-brand-gold transition-colors flex items-center gap-1">
+                  <span className="text-lg">↻</span> Refresh
+                </button>
+              </div>
+              <div className="space-y-4">
+                {allOrders.length === 0 && <p className="text-center text-white/50 py-12 glass-card rounded-2xl border border-white/10 border-dashed">No orders found.</p>}
+                {allOrders.map(order => (
+                  <div key={order.id} className="bg-neutral-900 border border-white/10 rounded-xl p-5 hover:border-brand-gold/30 transition-colors">
+                    <div className="flex flex-col md:flex-row justify-between items-start mb-4 gap-4">
+                      <div>
+                        <div className="flex items-center gap-3 mb-2">
+                          <span className="font-bold text-lg text-white/90">#{order.id.toString().slice(0, 8)}</span>
+                          <span className={`px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wider ${
+                            order.status === 'completed' ? 'bg-green-500/10 text-green-400 border border-green-500/20' :
+                            order.status === 'pending' ? 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20' :
+                            'bg-red-500/10 text-red-400 border border-red-500/20'
+                          }`}>
+                            {order.status}
+                          </span>
+                        </div>
+                        <p className="text-sm text-white/60 flex items-center gap-2">
+                          <span className="opacity-80">📅 {new Date(order.created_at).toLocaleString()}</span>
+                          <span className="text-white/20">|</span>
+                          <span>Stall: <span className="text-brand-gold font-bold">{order.stalls?.name || 'Unknown'}</span></span>
+                        </p>
+                        <p className="text-sm text-white/60 mt-1 flex items-center gap-2">
+                          <span>👤 {order.profiles?.full_name || 'N/A'}</span>
+                          <span className="text-white/20">|</span>
+                          <span>📱 {order.profiles?.phone_number || 'N/A'}</span>
+                        </p>
+                      </div>
+                      <div className="text-left md:text-right">
+                        <div className="text-xl font-extrabold text-brand-gold">Rs. {Number(order.total_amount || 0).toFixed(2)}</div>
+                        {order.promo_code && <div className="text-xs text-white/60 mt-1 inline-block bg-white/5 px-2 py-1 rounded-md">Promo: {order.promo_code}</div>}
+                      </div>
+                    </div>
+                    
+                    <div className="bg-black/40 rounded-xl p-4 border border-white/5">
+                      <h4 className="text-xs font-bold text-white/40 mb-3 uppercase tracking-wider">Order Items</h4>
+                      <div className="space-y-2">
+                        {(order.order_items || []).map((item: any, i: number) => (
+                          <div key={i} className="flex justify-between items-center text-sm">
+                            <div className="flex items-center gap-2">
+                              <span className="bg-brand-gold/10 text-brand-gold font-bold px-2 py-0.5 rounded-md text-xs">{item.quantity}x</span> 
+                              <span className="text-white/90 font-medium">{item.menu_items?.name || 'Unknown Item'}</span>
+                            </div>
+                            <span className="text-white/60 font-medium">Rs. {(item.price_at_time * item.quantity).toFixed(2)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         )}
