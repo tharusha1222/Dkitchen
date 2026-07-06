@@ -1,0 +1,5 @@
+node_modules/
+baileys_auth_info/
+.env
+.env.local
+npm-debug.log*
