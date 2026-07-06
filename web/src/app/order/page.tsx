@@ -86,19 +86,9 @@ export default function OrderPage() {
         return;
       }
 
-      const token = `ORDER_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-
-      let profileId = null;
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user?.id) {
-        profileId = session.user.id;
-      } else {
-        const { data: profile } = await supabase.from('profiles').select('id').eq('phone_number', userPhone).single();
-        if (profile) profileId = profile.id;
-      }
+      const token = `ORDER_${Date.now()}_${userPhone}`;
 
       const { data: orderData, error: orderError } = await supabase.from('orders').insert({
-        user_id: profileId,
         total_amount: finalTotal,
         promo_code: appliedPromo?.code || null,
         qr_token: token,

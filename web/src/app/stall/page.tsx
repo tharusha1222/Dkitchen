@@ -98,7 +98,8 @@ export default function StallDashboard() {
       if (!updateData.success) throw new Error(updateData.error || 'Failed to update order');
 
       // 2. Send "Order Complete" notification via WhatsApp
-      const phone = orderData.profiles?.phone_number;
+      const parts = orderData.qr_token.split('_');
+      const phone = parts.length > 2 ? parts[2] : null;
       if (phone) {
         const items = orderData.order_items.map((item: any) => ({
           name: item.menu_items?.name || 'Item',

@@ -68,13 +68,6 @@ export default function AuthPage() {
         throw new Error(data.error || 'Invalid OTP');
       }
 
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        phone: data.phone,
-        password: data.password
-      });
-
-      if (signInError) throw signInError;
-
       localStorage.setItem('canteen_user_phone', data.phone);
       localStorage.setItem('canteen_user_name', fullName);
 
